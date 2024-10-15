@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title></title>
+    <script src="https://unpkg.com/graphql-sse/umd/graphql-sse.js"></script>
+  </head>
+  <body>
+    <pre id="output"></pre>
+    <script>
+      const output = document.getElementById('output');
+
+      const client = graphqlSse.createClient({
+        url: '/graphql',
+        on: {
+          connecting: (reconnecting) => {
+            output.textContent += reconnecting
+              ? 'Reconnecting...\n'
+              : 'Connecting...\n';
+          },
+          connected: (reconnected) => {
+            output.textContent += reconnected ? 'Reconnected.\n' : 'Connected.\n';
+          }
+        }
+      });
+
+      (async () => {
+        const subscription = client.iterate({
+          query: /* GraphQL */ `
+            subscription LogMessagesSubscription {
+              logMessages {
+                id
+                level
+                message
+                timestamp
+              }
+            }
+          `
+        });
+
+        for await (const result of subscription) {
+          output.textContent += JSON.stringify(result.data, null, 2) + '\n';
+          scrollTo(0, document.body.scrollHeight);
+        }
+      })();
+    </script>
+  </body>
+</html>

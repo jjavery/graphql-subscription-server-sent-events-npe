@@ -1,0 +1,14 @@
+type Query {
+  logMessage(id: ID!): LogMessage
+}
+
+type Subscription {
+  logMessages: LogMessage
+}
+
+type LogMessage {
+  id: ID!
+  level: String
+  message: String
+  timestamp: String
+}
